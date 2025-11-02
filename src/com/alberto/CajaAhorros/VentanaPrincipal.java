@@ -1,15 +1,18 @@
 package com.alberto.CajaAhorros;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 
 import javax.swing.JFrame;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -54,7 +57,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 	public static void main(String[] args) {
 		
 		try {
-			UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -142,7 +145,10 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 		frame.getContentPane().add(scrollPane);
 		frame.setTitle("Caja De Ahorros");
 		table = new JTable();
-
+		table.setShowGrid(true);
+		Border bordeEncabezado = BorderFactory.createLineBorder(Color.BLUE,2);
+		
+		table.getTableHeader().setBorder(bordeEncabezado);
 		ListSelectionModel modelo_seleccion = table.getSelectionModel();
 
 		modelo_seleccion.addListSelectionListener(new ListSelectionListener() {
@@ -207,6 +213,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 				model.addColumn("SALIDA");
 				model.addColumn("CAPITAL");
 
+				table.getTableHeader().setDefaultRenderer(render);
 				Object[] fila = { null, 0, 0, null };
 				model.addRow(fila);
 				model.addTableModelListener(table);
@@ -224,7 +231,6 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 				seleccionarAbrirArchivo(model, lblInfo);
 				centrarTextoEnCeldas();
 				table.setModel(model);			btnGuardarArchivo.setEnabled(true);
-				//abrirArchivo();
 			}
 		});
 
@@ -335,6 +341,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 	public void seleccionarAbrirArchivo(DefaultTableModel model, JLabel lblinfo) {
 
 		table.setModel(model);
+		table.getTableHeader().setDefaultRenderer(render);
 		int numFilas = model.getRowCount();
 		float primera_entrada = Float.parseFloat((String) model.getValueAt(0, 1));
 		float primera_salida = Float.parseFloat((String) model.getValueAt(0, 2));
@@ -367,6 +374,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 		JFileChooser selectorArchivos = new JFileChooser();
 		FileNameExtensionFilter filtro = new FileNameExtensionFilter("Valores separados por comas (*.csv)", "csv");
 		selectorArchivos.setFileFilter(filtro);
+		selectorArchivos.setCurrentDirectory(archivoElegido);
 		int resultado = selectorArchivos.showOpenDialog(null);
 
 		if (resultado == JFileChooser.APPROVE_OPTION) {
@@ -385,6 +393,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 	public void guardarArchivo() {
 
 		JFileChooser selectorArchivos = new JFileChooser();
+		selectorArchivos.setCurrentDirectory(archivoElegido);
 		FileNameExtensionFilter filtro = new FileNameExtensionFilter("Valores separados por comas (*.csv)", "csv");
 		selectorArchivos.setFileFilter(filtro);
 
