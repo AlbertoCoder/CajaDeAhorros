@@ -34,28 +34,29 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.Font;
 
 public class VentanaPrincipal extends JFrame implements TableModelListener {
-	
+
 	private static final long serialVersionUID = 1L;
 	private JFrame frame;
 	private JTable table;
 	private JButton btnSalir;
 	private JButton btnAgregarRegistro;
-	private JButton btnGuardarArchivo = new JButton("Guardar Archivo");
+	private JButton btnGuardarArchivo = new JButton("Guardar Como...");
 	private File archivoElegido;
 	private static DefaultTableModel model = new DefaultTableModel();
 	private DefaultTableCellRenderer render = new DefaultTableCellRenderer();
 	private JLabel lblInfo = new JLabel("");
 	private JButton btnEliminarRegistro = new JButton("Eliminar Registro");
 	private JButton btnAbrirArchivo = new JButton("Abrir Archivo");
-
+	private JButton btnGuardar = new JButton("Guardar");
+	
 	public static DefaultTableModel getModelo() {
-		
+
 		return model;
-	
+
 	}
-	
+
 	public static void main(String[] args) {
-		
+
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
@@ -70,7 +71,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 		} catch (UnsupportedLookAndFeelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -92,23 +93,23 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 	private void initialize() {
 
 		frame = new JFrame();
-		frame.setBounds(100, 100, 615, 294);
+		frame.setBounds(100, 100, 615, 335);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
 		render.setHorizontalAlignment(JLabel.CENTER);
-		
+
 		System.out.println("Inicializando...");
-		
+
 		btnGuardarArchivo.setEnabled(false);
 		btnEliminarRegistro.setEnabled(false);
-		
+
 		btnAbrirArchivo.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
 				abrirArchivo();
-
+				btnGuardar.setEnabled(true);
 			}
 		});
 
@@ -125,7 +126,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 			}
 		});
 
-		btnSalir.setBounds(450, 215, 139, 27);
+		btnSalir.setBounds(450, 245, 139, 27);
 		frame.getContentPane().add(btnSalir);
 
 		btnAgregarRegistro = new JButton("Agregar Registro");
@@ -134,10 +135,11 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 			public void actionPerformed(ActionEvent e) {
 
 				agregarFila();
+				verFinalTabla(table);
 			}
 		});
 
-		btnAgregarRegistro.setBounds(450, 99, 139, 27);
+		btnAgregarRegistro.setBounds(450, 129, 139, 27);
 		frame.getContentPane().add(btnAgregarRegistro);
 
 		JScrollPane scrollPane = new JScrollPane();
@@ -146,8 +148,8 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 		frame.setTitle("Caja De Ahorros");
 		table = new JTable();
 		table.setShowGrid(true);
-		Border bordeEncabezado = BorderFactory.createLineBorder(Color.BLUE,2);
-		
+		Border bordeEncabezado = BorderFactory.createLineBorder(Color.BLUE, 2);
+
 		table.getTableHeader().setBorder(bordeEncabezado);
 		ListSelectionModel modelo_seleccion = table.getSelectionModel();
 
@@ -182,11 +184,11 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 				FileNameExtensionFilter filtro = new FileNameExtensionFilter("Valores separados por comas (*.csv)",
 						"csv");
 				selectorArchivos.setFileFilter(filtro);
-				guardarArchivo();
+				guardarArchivoComo();
 			}
 		});
 
-		btnGuardarArchivo.setBounds(450, 70, 139, 27);
+		btnGuardarArchivo.setBounds(450, 100, 139, 27);
 		frame.getContentPane().add(btnGuardarArchivo);
 
 		btnEliminarRegistro.addActionListener(new ActionListener() {
@@ -196,15 +198,15 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 			}
 		});
 
-		btnEliminarRegistro.setBounds(450, 128, 139, 27);
+		btnEliminarRegistro.setBounds(450, 158, 139, 27);
 		frame.getContentPane().add(btnEliminarRegistro);
 
-		JButton btnArchivoNuevo = new JButton("Nuevo Archivo");
+		JButton btnArchivoNuevo = new JButton("Crear Archivo");
 		btnArchivoNuevo.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
-				//model.setRowCount(0);
+				// model.setRowCount(0);
 				eliminarColumnas();
 				model = new DefaultTableModel();
 				table.setModel(model);
@@ -222,7 +224,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 
 				centrarTextoEnCeldas();
 
-				guardarArchivo();
+				guardarArchivoComo();
 
 				model = LectorCSV.cargarDatosCsv(archivoElegido.getAbsolutePath());
 				frame.setTitle("Caja De Ahorros " + " (" + archivoElegido.getName() + ")");
@@ -230,7 +232,8 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 				model.isCellEditable(0, 3);
 				seleccionarAbrirArchivo(model, lblInfo);
 				centrarTextoEnCeldas();
-				table.setModel(model);			btnGuardarArchivo.setEnabled(true);
+				table.setModel(model);
+				btnGuardarArchivo.setEnabled(true);
 			}
 		});
 
@@ -257,25 +260,37 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 
 			}
 		});
-		btnImprTabla.setBounds(450, 157, 139, 27);
+		btnImprTabla.setBounds(450, 187, 139, 27);
 		frame.getContentPane().add(btnImprTabla);
-		
+
 		JButton btnGrfco = new JButton("Gráfico");
 		btnGrfco.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			
+
 				VentanaGrfco ventanaGrfco = new VentanaGrfco();
-				
+
 				ventanaGrfco.setTitle("Gráfico");
 				ventanaGrfco.setResizable(false);
 				ventanaGrfco.setLocationRelativeTo(null);
 				ventanaGrfco.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 				ventanaGrfco.setVisible(true);
-			
+
 			}
 		});
-		btnGrfco.setBounds(450, 186, 139, 27);
+		btnGrfco.setBounds(450, 216, 139, 27);
 		frame.getContentPane().add(btnGrfco);
+
+		btnGuardar.setEnabled(false);
+		btnGuardar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				guardarArchivo();
+				btnGuardar.setEnabled(false);
+			}
+		});
+
+		btnGuardar.setBounds(450, 71, 139, 27);
+		frame.getContentPane().add(btnGuardar);
 		frame.setLocationRelativeTo(null);
 	}
 
@@ -295,7 +310,7 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 
 			System.out.println("Estás editando la celda " + table.getEditingRow() + ":" + table.getEditingColumn());
 			actualizarModeloTabla(model, e, lblInfo);
-
+			btnGuardar.setEnabled(true);
 		}
 		;
 
@@ -386,11 +401,28 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 			seleccionarAbrirArchivo(model, lblInfo);
 			centrarTextoEnCeldas();
 			btnGuardarArchivo.setEnabled(true);
+			btnGuardar.setEnabled(false);
 		}
 
 	}
 
 	public void guardarArchivo() {
+		
+		String ruta = archivoElegido.getAbsolutePath();
+		
+		if (ruta.toLowerCase().endsWith(".csv")) {
+
+		archivoElegido = new File(ruta);
+
+		EscritorCSV escritor = new EscritorCSV();
+
+		escritor.escribirCSV(table, archivoElegido);
+		System.out.println("Se ha guardado el archivo.");
+		
+		}
+	}
+
+	public void guardarArchivoComo() {
 
 		JFileChooser selectorArchivos = new JFileChooser();
 		selectorArchivos.setCurrentDirectory(archivoElegido);
@@ -414,30 +446,43 @@ public class VentanaPrincipal extends JFrame implements TableModelListener {
 
 		}
 	}
-	
+
 	public void eliminarColumnas() {
-		
+
 		TableColumnModel columnModel = table.getColumnModel();
 		int columnCount = columnModel.getColumnCount();
 
 		// Loop backwards to safely remove columns from the view
 		for (int i = columnCount - 1; i >= 0; i--) {
-		    TableColumn column = columnModel.getColumn(i);
-		    // Use the TableColumnModel's removeColumn method
-		    columnModel.removeColumn(column);
-		}	
-			
+			TableColumn column = columnModel.getColumn(i);
+			// Use the TableColumnModel's removeColumn method
+			columnModel.removeColumn(column);
+		}
+
+	}
+
+	public static void verPrincipioTabla(JTable tabla) {
+
+		if (tabla.getRowCount() > 0) {
+
+			Rectangle rectangulo = tabla.getCellRect(0, 0, true);
+
+			tabla.scrollRectToVisible(rectangulo);
+		}
+
 	}
 	
-	public static void verPrincipioTabla(JTable tabla) {
+	public static void verFinalTabla(JTable tabla) {
 		
 		if(tabla.getRowCount()>0) {
 			
-			Rectangle rectangulo = tabla.getCellRect(0, 0, true);
-		
+			Rectangle rectangulo = tabla.getCellRect(tabla.getRowCount()-1, 0, true);
+			
 			tabla.scrollRectToVisible(rectangulo);
+			
+			
 		}
 		
 	}
-	
+
 }
